@@ -22,6 +22,7 @@ module.exports = function (form) {
       case 'file':
       case 'reset':
       case 'submit':
+      case 'button':
         return
       case 'checkbox': return body[el.name] = !!el.checked
       case 'radio':

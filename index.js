@@ -8,7 +8,7 @@ module.exports = function (form) {
 
   slice.call(form.querySelectorAll('input, textarea, select'))
   .forEach(function (el) {
-    if (el.disabled || !el.name) return
+    if (el.disabled || el.readOnly || !el.name) return
 
     switch (el.tagName.toLowerCase()) {
       case 'textarea': return body[el.name] = el.value

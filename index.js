@@ -12,7 +12,9 @@ module.exports = function (form) {
 
     switch (el.tagName.toLowerCase()) {
       case 'textarea': return body[el.name] = el.value
-      case 'select': return body[el.name] = el.options[el.selectedIndex].value
+      case 'select':
+        if (el.options.length) body[el.name] = el.options[el.selectedIndex].value
+        return
       case 'input': break
       default: return
     }

@@ -34,9 +34,9 @@ module.exports = function (form) {
       case 'submit':
       case 'button':
         return
-      case 'checkbox': return body[el.name] = !!el.checked
+      case 'checkbox': 
       case 'radio':
-        if (el.selected) body[el.name] = el.value
+        if (el.checked) body[el.name] = el.value
         return
     }
 

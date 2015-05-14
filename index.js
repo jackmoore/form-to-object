@@ -1,8 +1,6 @@
 
 /* jshint -W093 */
 
-var closest = require('component-closest')
-
 var slice = [].slice
 
 module.exports = function (form) {
@@ -14,9 +12,8 @@ module.exports = function (form) {
     if (!el.name) return
     // if an element is read only, then it doesn't make sense to send client
     if (el.readOnly) return
-    // if the element is disabled or any ancestor is disabled,
-    // then it shouldn't be sent to the server
-    if (closest(el, '[disabled]', true)) return
+    // if the element is disabled then it wouldn't be sent to the server
+    if (el.disabled) return
 
     switch (el.tagName.toLowerCase()) {
       case 'textarea': return body[el.name] = el.value
@@ -34,9 +31,9 @@ module.exports = function (form) {
       case 'submit':
       case 'button':
         return
-      case 'checkbox': return body[el.name] = !!el.checked
+      case 'checkbox': 
       case 'radio':
-        if (el.selected) body[el.name] = el.value
+        if (el.checked) body[el.name] = el.value
         return
     }
 

@@ -15,8 +15,15 @@ module.exports = function (form) {
     if (matches(el, ':disabled')) return
 
     if (el.type.indexOf(['file', 'reset', 'submit', 'button']) !== -1) return
-
-    body[el.name] = el.value
+    
+    var val;
+    if (el.type === 'checkbox') {
+      val = el.checked;
+    }
+    else {
+      val = el.value;
+    }
+    body[el.name] = val;
   })
 
   return body

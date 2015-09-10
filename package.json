@@ -1,13 +1,11 @@
 {
   "name": "form-to-object",
   "description": "Convert a form to an object",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "author": "Jonathan Ong <me@jongleberry.com> (http://jongleberry.com)",
   "license": "MIT",
   "repository": "jonathanong/form-to-object",
-  "dependencies": {
-    "matches-selector": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "mocha": "2",
     "istanbul": "0"

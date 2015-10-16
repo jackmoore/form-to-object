@@ -9,9 +9,6 @@ module.exports = function (form) {
     // if an element has no name, it wouldn't be sent to the server
     if (!key) return
 
-    // if an element is read only, then it doesn't make sense to send client
-    if (el.readOnly) return
-
     if (['file', 'reset', 'submit', 'button'].indexOf(el.type) > -1) return
 
     if (['checkbox', 'radio'].indexOf(el.type) > -1 && !el.checked) return

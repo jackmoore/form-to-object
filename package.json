@@ -7,7 +7,7 @@
   "repository": "jonathanong/form-to-object",
   "dependencies": {},
   "devDependencies": {
-    "mocha": "2",
+    "mocha": "2.4.3",
     "istanbul": "0"
   },
   "scripts": {

@@ -1,4 +1,17 @@
-/* jshint -W093 */
+function getValues(el) {
+  if(el.type !== 'select-multiple') return el.value
+
+  if(!el.options || !el.options.length) return el.value
+
+  var results = Array.prototype.slice.call(el.options).reduce(function(acc, option) {
+    if(option.selected) {
+      acc.push(option.value || option.text)
+    }
+    return acc
+  }, [])
+
+  return results || undefined
+}
 
 module.exports = function (form) {
   var body = Object.create(null)
@@ -21,13 +34,15 @@ module.exports = function (form) {
         body[key] = [];
       }
     }
+
+    var value = getValues(el);
     
     if (body[key] === undefined) {
-      body[key] = el.value;
+      body[key] = value;
     } else if (Object.prototype.toString.call(body[key]) === '[object Array]') {
-      body[key].push(el.value);
+      body[key].push(value);
     } else {
-      body[key] = [body[key], el.value];
+      body[key] = [body[key], value];
     }
   })
 

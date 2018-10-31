@@ -1,50 +1,51 @@
-function getValues(el) {
-  if(el.type !== 'select-multiple') return el.value
+(function (global, factory) {
+	if (typeof define === "function" && define.amd) {
+		define(['module', 'exports'], factory);
+	} else if (typeof exports !== "undefined") {
+		factory(module, exports);
+	} else {
+		var mod = {
+			exports: {}
+		};
+		factory(mod, mod.exports);
+		global.formToObject = mod.exports;
+	}
+})(this, function (module, exports) {
+	'use strict';
 
-  if(!el.options || !el.options.length) return el.value
+	exports.default = function (form) {
+		var obj = Object.create(null);
 
-  var results = Array.prototype.slice.call(el.options).reduce(function(acc, option) {
-    if(option.selected) {
-      acc.push(option.value || option.text)
-    }
-    return acc
-  }, [])
+		function assign(name, value) {
+			if (obj[name] === undefined) {
+				obj[name] = value;
+			} else if (Array.isArray(obj[name])) {
+				obj[name].push(value);
+			} else {
+				obj[name] = [obj[name], value];
+			}
+		}
 
-  return results || undefined
-}
+		Array.prototype.slice.call(form.elements).forEach(function (field) {
+			if (field.name && !field.disabled && (['file', 'reset', 'button'].indexOf(field.type) === -1)) {
+				if (field.type === 'select-multiple') {
+					Array.prototype.slice.call(field.options).forEach(function (option) {
+						if (option.selected) {
+							assign(field.name, option.value);
+						}
+					})
+				} else if (field.type === 'checkbox' || field.type === 'radio') {
+					if (field.checked) {
+						assign(field.name, field.value);
+					}
+				} else {
+					assign(field.name, field.value);
+				}
+			}
+		})
 
-module.exports = function (form) {
-  var body = Object.create(null)
+		return obj;
+	};
 
-  Array.prototype.slice.call(form.querySelectorAll('input:not(:disabled), textarea:not(:disabled), select:not(:disabled)')).forEach(function (el) {
-    var key = el.name;
-
-    // if an element has no name, it wouldn't be sent to the server
-    if (!key) return
-
-    if (['file', 'reset', 'submit', 'button'].indexOf(el.type) > -1) return
-
-    if (['checkbox', 'radio'].indexOf(el.type) > -1 && !el.checked) return
-
-    if (/\[\]$/.test(key)) {
-      key = key.slice(0,-2);
-
-      // if using array notation, go ahead and put the first value into an array.
-      if (body[key] === undefined) {
-        body[key] = [];
-      }
-    }
-
-    var value = getValues(el);
-    
-    if (body[key] === undefined) {
-      body[key] = value;
-    } else if (Object.prototype.toString.call(body[key]) === '[object Array]') {
-      body[key].push(value);
-    } else {
-      body[key] = [body[key], value];
-    }
-  })
-
-  return body
-}
+	module.exports = exports['default'];
+});

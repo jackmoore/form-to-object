@@ -44,9 +44,9 @@ Return value: `Object`
 </form>
 <script>
   var form = document.querySelector('form');
-  var code = document.querySelector('code');
+  var object = formToObject(form);
 
-  console.log(JSON.stringify(formToObject(form)));
+  console.log(JSON.stringify(object));
 </script>
 ```
 

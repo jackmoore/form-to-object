@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<meta charset='utf-8'/>
+<title>Demo</title>
+<style>
+	body {
+		font-family: sans-serif;
+		display: flex;
+		font-size: 12px;
+		padding: 1.5rem;
+		margin: 0;
+	}
+
+	input, textarea, select, code {
+		font-size: 1rem;
+	}
+
+	code {
+		white-space: pre;
+		background: hsla(0,0%,90%,1);
+		display: block;
+		padding: 1rem;
+	}
+
+	span {
+		margin-bottom: 10px;
+		display: inline-block;
+	}
+
+	h5 {
+		margin: 1rem 0 0.5rem 0;
+		font-weight: normal;
+		font-size: 1rem;
+	}
+
+	input {
+		display: inline-block;
+		margin-right: 1rem;
+	}
+
+	label {
+		display: block;
+	}
+
+	.out {
+		margin-left: 2rem;
+	}
+</style>
+<body>
+	<div class='in'>
+		<h2>Input:</h2>
+		<form>
+			<label>
+				<h5>First Name</h5>
+				<input type='text' name='first-name' value='Daisy'/>
+			</label>
+			<label>
+				<h5>Last Name</h5>
+				<input type='text' name='last-name' value=''/>
+			</label>
+			<h5>Favorite Colors</h5>
+			<label>
+				<input type='checkbox' name='colors' value='red'/>
+				<span>red</span>
+			</label>
+			<label>
+				<input type='checkbox' name='colors' value='blue' checked/>
+				<span>blue</span>
+			</label>
+			<label>
+				<input type='checkbox' name='colors' value='green' checked/>
+				<span>green</span>
+			</label>
+			<h5>Favorite Colors</h5>
+			<label>
+				<input type='radio' name='favorites' value='pizza'/>
+				<span>pizza</span>
+			</label>
+			<label>
+				<input type='radio' name='favorites' value='mayonnaise'/>
+				<span>mayonnaise</span>
+			</label>
+			<label>
+				<input type='radio' name='favorites' value='tacos' checked/>
+				<span>tacos</span>
+			</label>
+			<label>
+				<input type='radio' name='favorites' value='caviar'/>
+				<span>caviar</span>
+			</label>
+			<h5>Message</h5>
+			<textarea name='message'>Hello World!</textarea>
+			<div>
+				<button>Submit</button>
+			</div>
+		</form>
+	</div>
+	<div class='out'>
+		<h2>Output:</h2>
+		<code></code>
+
+		<script src='index.js'></script>
+		<script>
+			const form = document.querySelector('form');
+			const code = document.querySelector('code');
+
+			function update() {
+				code.innerText = JSON.stringify(formToObject(form), null, 2);
+			}
+
+			form.addEventListener('submit', function(e){
+				e.preventDefault();
+				update();
+			});
+
+			update();
+		</script>
+	</div>
+</body>

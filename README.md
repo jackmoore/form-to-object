@@ -2,12 +2,12 @@
 
 Convert form input values to an object.
 
-### Install via NPM
+#### Install via NPM
 ```bash
 npm install form-to-object
 ```
 
-### Browser compatibility
+#### Browser compatibility
 
 Chrome | Firefox | IE | Safari | iOS Safari 
 ------ | --------|----|--------|------------
@@ -23,7 +23,7 @@ Parameters: `HTMLFormElement`
 
 Return value: `Object`
 
-### Example 
+#### Example 
 
 ##### Input:
 

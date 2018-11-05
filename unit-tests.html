@@ -7,6 +7,7 @@
     display: flex;
     margin-bottom: 0.5rem;
     max-width: 50rem;
+    user-select: none;
   }
   .label {
     padding: 0.5rem;
@@ -16,35 +17,44 @@
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
   }
-  .label--pass {
-    background: green;
-  }
-  .label--fail {
-    background: red;
-  }
   .msg {
     padding: 0.5rem;
     flex-grow: 1;
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
   }
-  .msg--pass {
+  .result[data-details="false"] .details {
+    display: none;
+  }
+  .result[data-pass="true"] .msg {
     background: #e3f5dc;
   }
-  .msg--fail {
+  .result[data-pass="false"] .msg {
     background: #ffe5e5;
   }
+  .result[data-pass="true"] .label {
+    background: green;
+  }
+  .result[data-pass="false"] .label {
+    background: red;
+  }
+
   code {
+    /*flex: 1;*/
     display: block;
     margin-top: 0.5rem;
-    background-color: #fbd5d5;
+    background-color: hsla(0,0%,0%,0.05);
     padding: 0.25rem 0.5rem;
+    white-space: pre;
   }
+/*  code:not(:last-child) {
+    margin-right: 0.5rem;
+  }*/
 </style>
 <body>
 <script src='index.js'></script>
 <script>
-  const fto = formToObject;
+  var fto = formToObject;
 
   function isEqual(a, b) {
     return (Object.keys(a).length === Object.keys(b).length )&& Object.keys(a).every(key => {
@@ -55,169 +65,176 @@
     });
   }
 
-  function compare(actual, expected, description) {
-    const pass = isEqual(actual, expected);
-    const el = document.createElement('div');
-    el.classList.add('result');
+  function compare(form, expected, description) {
+    var actual = fto(form);
+    var pass = isEqual(actual, expected);
+    var el = document.createElement('div');
+    el.className = 'result';
+    el.setAttribute('data-pass', pass);
+    el.setAttribute('data-details', pass ? 'false' : 'true');
+    el.addEventListener('click', function(){
+      el.setAttribute('data-details', el.getAttribute('data-details') === 'true' ? 'false' : 'true');
+    });
 
-    {
-      const label = document.createElement('div');
-      label.classList.add('label');
-      label.classList.add('label--'+(pass ? 'pass' : 'fail'));
-      label.textContent = pass ? '✔' : '✘';
-      el.appendChild(label);
-    }
-    {
-      const msg = document.createElement('div');
-      msg.classList.add('msg');
-      msg.classList.add('msg--'+(pass ? 'pass' : 'fail'));
-      msg.textContent = description;
+    var label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = pass ? '✔' : '✘';
+    el.appendChild(label);
 
-      if (!pass) {
-        const c1 = document.createElement('code');
-        c1.textContent = 'Expected: '+JSON.stringify(expected);
-        msg.appendChild(c1);
+    var msg = document.createElement('div');
+    msg.className = 'msg';
+    msg.textContent = description;
 
-        const c2 = document.createElement('code');
-        c2.textContent = 'Actual: '+JSON.stringify(actual);
-        msg.appendChild(c2);
-      }
+    var details = document.createElement('div');
+    details.className = 'details';
 
-      el.appendChild(msg);
-    }
+    var c0 = document.createElement('code');
+    c0.textContent = '// HTML:\r\n<form>'+(form.innerHTML.replace(/<(?!\/)/g, "\r\n  <"))+'\r\n</form>';
+    details.appendChild(c0);
+
+    var c1 = document.createElement('code');
+    c1.textContent = '// Expected:\r\n'+JSON.stringify(expected, null, 2);
+    details.appendChild(c1);
+
+    var c2 = document.createElement('code');
+    c2.textContent = '// Actual:\r\n'+JSON.stringify(actual, null, 2);
+    details.appendChild(c2);
+
+    msg.appendChild(details);
+    el.appendChild(msg);
 
     document.body.appendChild(el);
   }
 
-  const tests = [
-    ()=> {
-      const form = document.createElement('form');
-      return compare(fto(form), {}, 'Form: blank');
+  var tests = [
+    function(){
+      var form = document.createElement('form');
+      return compare(form, {}, 'Form: blank');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.name = 'test';
       form.appendChild(el);
-      return compare(fto(form), {'test': ''}, 'Input: blank');
+      return compare(form, {'test': ''}, 'Input: blank');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.name = 'test';
       el.value = 'hello';
       form.appendChild(el);
-      return compare(fto(form), {'test': 'hello'}, 'Input: filled');
+      return compare(form, {'test': 'hello'}, 'Input: filled');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.name = 'test';
       el.value = 'hello';
       el.setAttribute('disabled',true);
       form.appendChild(el);
-      return compare(fto(form), {}, 'Input: filled, disabled');
+      return compare(form, {}, 'Input: filled, disabled');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.type = 'checkbox';
       el.name = 'box';
       el.value = 'hello';
       el.checked = true;
       form.appendChild(el);
 
-      const el2 = document.createElement('input');
+      var el2 = document.createElement('input');
       el2.type = 'checkbox';
       el2.name = 'box';
       el2.value = 'world';
       form.appendChild(el2);
 
-      const el3 = document.createElement('input');
+      var el3 = document.createElement('input');
       el3.type = 'checkbox';
       el3.name = 'box';
       form.appendChild(el3);
-      return compare(fto(form), {'box': 'hello'}, 'Checkboxes: single checked');
+      return compare(form, {'box': 'hello'}, 'Checkboxes: single checked');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.type = 'checkbox';
       el.name = 'box';
       el.value = 'hello';
       el.checked = true;
       form.appendChild(el);
 
-      const el2 = document.createElement('input');
+      var el2 = document.createElement('input');
       el2.type = 'checkbox';
       el2.name = 'box';
       el2.value = 'world';
       form.appendChild(el2);
 
-      const el3 = document.createElement('input');
+      var el3 = document.createElement('input');
       el3.type = 'checkbox';
       el3.name = 'box';
       el3.checked = true;
       form.appendChild(el3);
-      return compare(fto(form), {'box': ['hello', 'on']}, 'Checkboxes: multiple checked');
+      return compare(form, {'box': ['hello', 'on']}, 'Checkboxes: multiple checked');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.type = 'radio';
       el.name = 'test';
       form.appendChild(el);
 
-      const el2 = document.createElement('input');
+      var el2 = document.createElement('input');
       el2.type = 'radio';
       el2.name = 'test';
       el2.checked = true;
       form.appendChild(el2);
 
-      return compare(fto(form), {'test': 'on'}, 'Radios: default value');
+      return compare(form, {'test': 'on'}, 'Radios: default value');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('input');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('input');
       el.type = 'radio';
       el.name = 'test';
       el.value = 'hello';
       form.appendChild(el);
 
-      const el2 = document.createElement('input');
+      var el2 = document.createElement('input');
       el2.type = 'radio';
       el2.name = 'test';
       el2.value = 'world';
       el2.checked = true;
       form.appendChild(el2);
 
-      return compare(fto(form), {'test': 'world'}, 'Radios: value specified');
+      return compare(form, {'test': 'block'}, 'Radios: value specified');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('textarea');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('textarea');
       el.name = 'test';
       form.appendChild(el);
-      return compare(fto(form), {'test': ''}, 'Textarea: blank');
+      return compare(form, {'test': ''}, 'Textarea: blank');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('textarea');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('textarea');
       el.name = 'test';
       el.value = 'hello';
       form.appendChild(el);
-      return compare(fto(form), {'test': 'hello'}, 'Textarea: filled');
+      return compare(form, {'test': 'hello'}, 'Textarea: filled');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
       form.appendChild(el);
-      return compare(fto(form), {'test': ''}, 'Select: empty');
+      return compare(form, {'test': ''}, 'Select: empty');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
 
       var option1 = document.createElement('option');
@@ -232,11 +249,11 @@
       el.appendChild(option3);
       
       form.appendChild(el);
-      return compare(fto(form), {'test': ''}, 'Select: initial blank value');
+      return compare(form, {'test': ''}, 'Select: initial blank value');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
 
       var option1 = document.createElement('option');
@@ -252,11 +269,11 @@
       el.appendChild(option3);
       
       form.appendChild(el);
-      return compare(fto(form), {'test': 'first'}, 'Select: initial value');
+      return compare(form, {'test': 'first'}, 'Select: initial value');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
 
       var option1 = document.createElement('option');
@@ -274,19 +291,19 @@
       el.value = 'second';
 
       form.appendChild(el);
-      return compare(fto(form), {'test': 'second'}, 'Select: filled');
+      return compare(form, {'test': 'second'}, 'Select: filled');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
       el.setAttribute('multiple', true);
       form.appendChild(el);
-      return compare(fto(form), {}, 'Select-multiple: empty');
+      return compare(form, {}, 'Select-multiple: empty');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
       el.setAttribute('multiple', true);
 
@@ -303,11 +320,11 @@
       el.appendChild(option3);
       
       form.appendChild(el);
-      return compare(fto(form), {}, 'Select-multiple: initial value');
+      return compare(form, {}, 'Select-multiple: initial value');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
       el.setAttribute('multiple', true);
 
@@ -325,11 +342,11 @@
       el.appendChild(option3);
 
       form.appendChild(el);
-      return compare(fto(form), {'test': 'third'}, 'Select-multiple: single value');
+      return compare(form, {'test': 'third'}, 'Select-multiple: single value');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('select');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('select');
       el.name = 'test';
       el.setAttribute('multiple', true);
 
@@ -348,33 +365,33 @@
       el.appendChild(option3);
 
       form.appendChild(el);
-      return compare(fto(form), {'test': ['first', 'third']}, 'Select-multiple: multiple values');
+      return compare(form, {'test': ['first', 'third']}, 'Select-multiple: multiple values');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('button');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('button');
       el.name = 'test';
       el.type = 'button';
       el.value = 'hello'
       form.appendChild(el);
-      return compare(fto(form), {}, 'Button');
+      return compare(form, {}, 'Button');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('button');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('button');
       el.name = 'test';
       form.appendChild(el);
-      return compare(fto(form), {'test': ''}, 'Submit Button: initial value');
+      return compare(form, {'test': ''}, 'Submit Button: initial value');
     },
-    ()=> {
-      const form = document.createElement('form');
-      const el = document.createElement('button');
+    function(){
+      var form = document.createElement('form');
+      var el = document.createElement('button');
       el.name = 'test';
       el.value = 'hello';
       form.appendChild(el);
-      return compare(fto(form), {'test': 'hello'}, 'Submit Button: value');
+      return compare(form, {'test': 'hello'}, 'Submit Button: value');
     },
   ];
 
-  tests.forEach(x => x());
+  tests.forEach(function(x){ return x(); });
 </script>
